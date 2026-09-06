@@ -25,7 +25,22 @@ document.addEventListener('DOMContentLoaded', () => {
         navbar?.classList.toggle('scrolled', y > 50);
         btt?.classList.toggle('visible', y > 500);
         updateActiveNav();
-    });
+    }, { passive: true });
+
+    // Wheel event for float
+    window.addEventListener('wheel', e => {
+        e.preventDefault();
+        scrollVelocity += e.deltaY * 0.3;
+    }, { passive: false });
+
+    // Touch for mobile
+    let lastTouch = 0;
+    window.addEventListener('touchstart', e => { lastTouch = e.touches[0].clientY; }, { passive: true });
+    window.addEventListener('touchmove', e => {
+        const delta = lastTouch - e.touches[0].clientY;
+        scrollVelocity += delta * 0.5;
+        lastTouch = e.touches[0].clientY;
+    }, { passive: true });
 
     function updateActiveNav() {
         const sections = document.querySelectorAll('section[id]');
@@ -52,6 +67,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // === Subtle Float Scroll ===
+    let scrollTarget = window.scrollY;
+    let scrollCurrent = window.scrollY;
+    let scrollVelocity = 0;
+    const scrollEase = 0.12;
+    const scrollFriction = 0.92;
+    let isScrolling = false;
+
+    function smoothScroll() {
+        scrollTarget += scrollVelocity;
+        scrollVelocity *= scrollFriction;
+        scrollTarget = Math.max(0, scrollTarget);
+        scrollCurrent += (scrollTarget - scrollCurrent) * scrollEase;
+        window.scrollTo(0, Math.round(scrollCurrent));
+        requestAnimationFrame(smoothScroll);
+    }
+    smoothScroll();
 
     // === Hamburger ===
     const hamburger = document.getElementById('hamburger');
