@@ -10,10 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const scrollState = {
         target: 0,
         current: 0,
-        ease: 0.09,         // Balanced float (smooth but responsive)
+        ease: 0.18,         // Normal smooth scroll
         momentum: 0,
-        maxMomentum: 55,
-        friction: 0.94,     // Moderate deceleration
+        maxMomentum: 30,
+        friction: 0.88,     // Quick stop
         isScrolling: false,
         raf: null
     };
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Add momentum based on wheel delta
         const delta = e.deltaY || e.detail;
-        scrollState.momentum += delta * 0.9;  // Balanced force
+        scrollState.momentum += delta * 0.5;  // Normal force
         scrollState.momentum = Math.max(-scrollState.maxMomentum, Math.min(scrollState.maxMomentum, scrollState.momentum));
 
         // Clear existing timeout
@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const touchY = e.touches[0].clientY;
         const delta = touchLastY - touchY;
-        scrollState.momentum += delta * 1.2;  // Balanced mobile
+        scrollState.momentum += delta * 0.8;  // Normal mobile
         scrollState.momentum = Math.max(-scrollState.maxMomentum, Math.min(scrollState.maxMomentum, scrollState.momentum));
         touchLastY = touchY;
     }, { passive: false });
