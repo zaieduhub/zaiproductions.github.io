@@ -10,10 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const scrollState = {
         target: 0,
         current: 0,
-        ease: 0.075,        // Lower = smoother float (0.05-0.12)
+        ease: 0.045,        // Ultra-smooth floating (lower = dreamier)
         momentum: 0,
-        maxMomentum: 50,
-        friction: 0.95,
+        maxMomentum: 80,
+        friction: 0.97,     // Higher = longer float glide
         isScrolling: false,
         raf: null
     };
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Add momentum based on wheel delta
         const delta = e.deltaY || e.detail;
-        scrollState.momentum += delta * 0.8;
+        scrollState.momentum += delta * 1.2;  // Amplify for more float
         scrollState.momentum = Math.max(-scrollState.maxMomentum, Math.min(scrollState.maxMomentum, scrollState.momentum));
 
         // Clear existing timeout
@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const touchY = e.touches[0].clientY;
         const delta = touchLastY - touchY;
-        scrollState.momentum += delta * 1.5;
+        scrollState.momentum += delta * 2.0;  // More mobile float
         scrollState.momentum = Math.max(-scrollState.maxMomentum, Math.min(scrollState.maxMomentum, scrollState.momentum));
         touchLastY = touchY;
     }, { passive: false });
