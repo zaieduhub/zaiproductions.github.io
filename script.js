@@ -114,12 +114,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { threshold: 0.5 });
     counters.forEach(c => counterObs.observe(c));
 
-    // === Smooth Scroll ===
+    // === Smooth Scroll (Native CSS smooth + JS fallback) ===
     document.querySelectorAll('a[href^="#"]').forEach(a => {
         a.addEventListener('click', e => {
             e.preventDefault();
-            const t = document.querySelector(a.getAttribute('href'));
-            if (t) t.scrollIntoView({ behavior: 'smooth' });
+            const href = a.getAttribute('href');
+            if (href === '#') return;
+            const target = document.querySelector(href);
+            if (target) {
+                const navHeight = navbar?.offsetHeight || 80;
+                const targetPos = target.getBoundingClientRect().top + window.scrollY - navHeight;
+                window.scrollTo({ top: targetPos, behavior: 'smooth' });
+            }
         });
     });
 
