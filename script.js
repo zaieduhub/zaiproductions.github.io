@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Wheel event for float
     window.addEventListener('wheel', e => {
         e.preventDefault();
-        scrollVelocity += e.deltaY * 0.3;
+        scrollVelocity += e.deltaY * 0.5;
     }, { passive: false });
 
     // Touch for mobile
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('touchstart', e => { lastTouch = e.touches[0].clientY; }, { passive: true });
     window.addEventListener('touchmove', e => {
         const delta = lastTouch - e.touches[0].clientY;
-        scrollVelocity += delta * 0.5;
+        scrollVelocity += delta * 0.8;
         lastTouch = e.touches[0].clientY;
     }, { passive: true });
 
@@ -72,8 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let scrollTarget = window.scrollY;
     let scrollCurrent = window.scrollY;
     let scrollVelocity = 0;
-    const scrollEase = 0.12;
-    const scrollFriction = 0.92;
+    const scrollEase = 0.10;
+    const scrollFriction = 0.94;
     let isScrolling = false;
 
     function smoothScroll() {
