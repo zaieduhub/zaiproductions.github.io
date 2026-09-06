@@ -1,61 +1,63 @@
 // ============================================
-// ZAI Productions - JavaScript
+// ZAI Productions — Enhanced JavaScript
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
+
+    // === Cursor Glow ===
+    const cursorGlow = document.getElementById('cursorGlow');
+    let mouseX = 0, mouseY = 0;
+    let glowX = 0, glowY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+
+    function animateCursor() {
+        glowX += (mouseX - glowX) * 0.08;
+        glowY += (mouseY - glowY) * 0.08;
+        if (cursorGlow) {
+            cursorGlow.style.left = glowX + 'px';
+            cursorGlow.style.top = glowY + 'px';
+        }
+        requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
 
     // === Loader ===
     const loader = document.getElementById('loader');
     setTimeout(() => {
         loader.classList.add('hidden');
-    }, 1800);
+    }, 2200);
 
-    // === Navbar Scroll Effect ===
+    // === Navbar Scroll ===
     const navbar = document.getElementById('navbar');
     const backToTop = document.getElementById('backToTop');
 
     window.addEventListener('scroll', () => {
         const scrollY = window.scrollY;
-
-        if (scrollY > 50) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
-        }
-
-        if (scrollY > 500) {
-            backToTop.classList.add('visible');
-        } else {
-            backToTop.classList.remove('visible');
-        }
-
-        // Active nav link
-        updateActiveNavLink();
+        navbar.classList.toggle('scrolled', scrollY > 50);
+        backToTop.classList.toggle('visible', scrollY > 500);
+        updateActiveNav();
     });
 
     // === Active Nav Link ===
-    function updateActiveNavLink() {
+    function updateActiveNav() {
         const sections = document.querySelectorAll('section[id]');
-        const navLinks = document.querySelectorAll('.nav-link');
-        const scrollPos = window.scrollY + 150;
+        const links = document.querySelectorAll('.nav-link');
+        const pos = window.scrollY + 150;
 
-        sections.forEach(section => {
-            const top = section.offsetTop;
-            const height = section.offsetHeight;
-            const id = section.getAttribute('id');
-
-            if (scrollPos >= top && scrollPos < top + height) {
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href') === `#${id}`) {
-                        link.classList.add('active');
-                    }
+        sections.forEach(s => {
+            if (pos >= s.offsetTop && pos < s.offsetTop + s.offsetHeight) {
+                links.forEach(l => {
+                    l.classList.toggle('active', l.getAttribute('href') === `#${s.id}`);
                 });
             }
         });
     }
 
-    // === Hamburger Menu ===
+    // === Hamburger ===
     const hamburger = document.getElementById('hamburger');
     const mobileMenu = document.getElementById('mobileMenu');
     const mobileLinks = document.querySelectorAll('.mobile-link');
@@ -75,115 +77,106 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // === Scroll Animations ===
-    const animatedElements = document.querySelectorAll('[data-animate]');
-
+    const animElements = document.querySelectorAll('[data-animate]');
     const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry, index) => {
+        entries.forEach((entry, i) => {
             if (entry.isIntersecting) {
-                setTimeout(() => {
-                    entry.target.classList.add('visible');
-                }, index * 100);
+                setTimeout(() => entry.target.classList.add('visible'), i * 80);
                 observer.unobserve(entry.target);
             }
         });
-    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-
-    animatedElements.forEach(el => observer.observe(el));
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    animElements.forEach(el => observer.observe(el));
 
     // === Counter Animation ===
-    const counters = document.querySelectorAll('.stat-number[data-count]');
-
-    const counterObserver = new IntersectionObserver((entries) => {
+    const counters = document.querySelectorAll('.stat-num[data-count]');
+    const counterObs = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                const counter = entry.target;
-                const target = parseInt(counter.getAttribute('data-count'));
+                const el = entry.target;
+                const target = parseInt(el.getAttribute('data-count'));
                 const duration = 2000;
-                const increment = target / (duration / 16);
+                const step = target / (duration / 16);
                 let current = 0;
-
-                const updateCounter = () => {
-                    current += increment;
+                const update = () => {
+                    current += step;
                     if (current < target) {
-                        counter.textContent = Math.floor(current);
-                        requestAnimationFrame(updateCounter);
+                        el.textContent = Math.floor(current);
+                        requestAnimationFrame(update);
                     } else {
-                        counter.textContent = target;
+                        el.textContent = target;
                     }
                 };
-
-                updateCounter();
-                counterObserver.unobserve(counter);
+                update();
+                counterObs.unobserve(el);
             }
         });
     }, { threshold: 0.5 });
+    counters.forEach(c => counterObs.observe(c));
 
-    counters.forEach(counter => counterObserver.observe(counter));
-
-    // === Smooth Scroll for anchor links ===
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
+    // === Smooth Scroll ===
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', (e) => {
             e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth' });
-            }
+            const target = document.querySelector(a.getAttribute('href'));
+            if (target) target.scrollIntoView({ behavior: 'smooth' });
         });
     });
 
     // === Contact Form ===
-    const contactForm = document.getElementById('contactForm');
-
-    contactForm.addEventListener('submit', (e) => {
+    const form = document.getElementById('contactForm');
+    form.addEventListener('submit', (e) => {
         e.preventDefault();
-
-        const formData = new FormData(contactForm);
-        const name = formData.get('name');
-        const email = formData.get('email');
-        const service = formData.get('service');
-        const message = formData.get('message');
-
-        // Create mailto link
-        const subject = encodeURIComponent(`Service Inquiry - ${service}`);
+        const fd = new FormData(form);
+        const subject = encodeURIComponent(`Service Inquiry — ${fd.get('service')}`);
         const body = encodeURIComponent(
-            `Name: ${name}\nEmail: ${email}\nService: ${service}\n\nProject Details:\n${message}`
+            `Name: ${fd.get('name')}\nEmail: ${fd.get('email')}\nService: ${fd.get('service')}\n\nDetails:\n${fd.get('message')}`
         );
-
-        // Open email client
         window.location.href = `mailto:zai2007.official@icloud.com?subject=${subject}&body=${body}`;
 
-        // Show success feedback
-        const btn = contactForm.querySelector('button[type="submit"]');
-        const originalHTML = btn.innerHTML;
-        btn.innerHTML = '<span>Message Sent!</span> <i class="fas fa-check"></i>';
-        btn.style.background = 'linear-gradient(135deg, #00cec9, #6c5ce7)';
-
-        setTimeout(() => {
-            btn.innerHTML = originalHTML;
-            btn.style.background = '';
-            contactForm.reset();
-        }, 3000);
+        const btn = form.querySelector('button[type="submit"]');
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<span>Sent!</span> <i class="fas fa-check"></i>';
+        btn.style.background = 'linear-gradient(135deg, #00e5d0, #7c5cff)';
+        setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; form.reset(); }, 3000);
     });
 
-    // === Tilt Effect on Hero Card ===
-    const heroCard = document.querySelector('.hero-card');
-    if (heroCard) {
-        heroCard.addEventListener('mousemove', (e) => {
-            const rect = heroCard.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
-            const rotateX = (y - centerY) / 10;
-            const rotateY = (centerX - x) / 10;
-
-            heroCard.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    // === Tilt on Float Cards ===
+    document.querySelectorAll('.float-card').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const r = card.getBoundingClientRect();
+            const x = (e.clientX - r.left - r.width / 2) / 15;
+            const y = (e.clientY - r.top - r.height / 2) / 15;
+            card.style.transform = `perspective(600px) rotateY(${x}deg) rotateX(${-y}deg)`;
         });
-
-        heroCard.addEventListener('mouseleave', () => {
-            heroCard.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = '';
         });
-    }
+    });
+
+    // === Magnetic Buttons ===
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('mousemove', (e) => {
+            const r = btn.getBoundingClientRect();
+            const x = e.clientX - r.left - r.width / 2;
+            const y = e.clientY - r.top - r.height / 2;
+            btn.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
+        });
+        btn.addEventListener('mouseleave', () => {
+            btn.style.transform = '';
+        });
+    });
+
+    // === Service Card Hover Glow ===
+    document.querySelectorAll('.service-card').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const r = card.getBoundingClientRect();
+            const x = e.clientX - r.left;
+            const y = e.clientY - r.top;
+            card.style.setProperty('--mx', x + 'px');
+            card.style.setProperty('--my', y + 'px');
+        });
+    });
 
     // === Typing Effect for Hero Badge ===
     const badge = document.querySelector('.hero-badge');
@@ -191,103 +184,18 @@ document.addEventListener('DOMContentLoaded', () => {
         badge.style.opacity = '0';
         badge.style.transform = 'translateY(20px)';
         setTimeout(() => {
-            badge.style.transition = 'all 0.6s ease';
+            badge.style.transition = 'all .8s var(--ease)';
             badge.style.opacity = '1';
             badge.style.transform = 'translateY(0)';
-        }, 2000);
+        }, 2200);
     }
 
-    // === Particles Background (subtle) ===
-    createParticles();
-});
-
-function createParticles() {
-    const canvas = document.createElement('canvas');
-    canvas.style.position = 'fixed';
-    canvas.style.top = '0';
-    canvas.style.left = '0';
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-    canvas.style.pointerEvents = 'none';
-    canvas.style.zIndex = '0';
-    canvas.style.opacity = '0.3';
-    document.body.prepend(canvas);
-
-    const ctx = canvas.getContext('2d');
-    let particles = [];
-    const count = 50;
-
-    function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-
-    resize();
-    window.addEventListener('resize', resize);
-
-    class Particle {
-        constructor() {
-            this.reset();
-        }
-
-        reset() {
-            this.x = Math.random() * canvas.width;
-            this.y = Math.random() * canvas.height;
-            this.size = Math.random() * 2 + 0.5;
-            this.speedX = (Math.random() - 0.5) * 0.5;
-            this.speedY = (Math.random() - 0.5) * 0.5;
-            this.opacity = Math.random() * 0.5 + 0.1;
-        }
-
-        update() {
-            this.x += this.speedX;
-            this.y += this.speedY;
-
-            if (this.x < 0 || this.x > canvas.width ||
-                this.y < 0 || this.y > canvas.height) {
-                this.reset();
-            }
-        }
-
-        draw() {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(108, 92, 231, ${this.opacity})`;
-            ctx.fill();
-        }
-    }
-
-    for (let i = 0; i < count; i++) {
-        particles.push(new Particle());
-    }
-
-    function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.forEach(p => {
-            p.update();
-            p.draw();
+    // === Parallax on Scroll ===
+    window.addEventListener('scroll', () => {
+        const scrollY = window.scrollY;
+        document.querySelectorAll('.bg-shape').forEach((shape, i) => {
+            const speed = (i + 1) * 0.03;
+            shape.style.transform = `translateY(${scrollY * speed}px)`;
         });
-
-        // Draw lines between nearby particles
-        for (let i = 0; i < particles.length; i++) {
-            for (let j = i + 1; j < particles.length; j++) {
-                const dx = particles[i].x - particles[j].x;
-                const dy = particles[i].y - particles[j].y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-
-                if (dist < 120) {
-                    ctx.beginPath();
-                    ctx.moveTo(particles[i].x, particles[i].y);
-                    ctx.lineTo(particles[j].x, particles[j].y);
-                    ctx.strokeStyle = `rgba(108, 92, 231, ${0.1 * (1 - dist / 120)})`;
-                    ctx.lineWidth = 0.5;
-                    ctx.stroke();
-                }
-            }
-        }
-
-        requestAnimationFrame(animate);
-    }
-
-    animate();
-}
+    });
+});
