@@ -7,22 +7,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // === Custom Cursor ===
     const cursor = document.getElementById('cursor');
     const trail = document.getElementById('cursorTrail');
-    let cx = 0, cy = 0, tx = 0, ty = 0;
+    const ring = document.getElementById('cursorRing');
+    let cx = 0, cy = 0, tx = 0, ty = 0, rx = 0, ry = 0;
 
     document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
 
     function animateCursor() {
-        cx += (tx - cx) * 0.15;
-        cy += (ty - cy) * 0.15;
+        cx += (tx - cx) * 0.18;
+        cy += (ty - cy) * 0.18;
+        rx += (tx - rx) * 0.06;
+        ry += (ty - ry) * 0.06;
         if (cursor) { cursor.style.left = cx + 'px'; cursor.style.top = cy + 'px'; }
         if (trail) { trail.style.left = tx + 'px'; trail.style.top = ty + 'px'; }
+        if (ring) { ring.style.left = rx + 'px'; ring.style.top = ry + 'px'; }
         requestAnimationFrame(animateCursor);
     }
     animateCursor();
 
-    document.querySelectorAll('a, button, .svc-card, .why-card, .test-card, .cm-card, .pill, .af-item, .float-service').forEach(el => {
-        el.addEventListener('mouseenter', () => cursor?.classList.add('active'));
-        el.addEventListener('mouseleave', () => cursor?.classList.remove('active'));
+    // Cursor hover effects
+    const hoverEls = document.querySelectorAll('a, button, .svc-card, .why-card, .test-card, .cm-card, .pill, .af-item, .float-service, .prs-link, .skill-tag, .prs-item, .pnc-badge');
+    hoverEls.forEach(el => {
+        el.addEventListener('mouseenter', () => {
+            cursor?.classList.add('active');
+            ring?.classList.add('visible');
+        });
+        el.addEventListener('mouseleave', () => {
+            cursor?.classList.remove('active');
+            ring?.classList.remove('visible');
+        });
     });
 
     // === Loader ===
@@ -42,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, 100);
 
-    // === Navbar Scroll ===
+    // === Butter-Smooth Scrolling ===
     const navbar = document.getElementById('navbar');
     const btt = document.getElementById('btt');
 
@@ -51,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
         navbar?.classList.toggle('scrolled', y > 50);
         btt?.classList.toggle('visible', y > 500);
         updateActiveNav();
-    });
+    }, { passive: true });
 
     function updateActiveNav() {
         const sections = document.querySelectorAll('section[id]');
@@ -63,6 +75,38 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // === Smooth Scroll with easing ===
+    function smoothScrollTo(target, duration = 1200) {
+        const navHeight = navbar?.offsetHeight || 80;
+        const targetPos = target.getBoundingClientRect().top + window.scrollY - navHeight;
+        const startPos = window.scrollY;
+        const distance = targetPos - startPos;
+        const startTime = performance.now();
+
+        function easeOutExpo(t) {
+            return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+        }
+
+        function step(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = easeOutExpo(progress);
+            window.scrollTo(0, startPos + distance * eased);
+            if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+            e.preventDefault();
+            const href = a.getAttribute('href');
+            if (href === '#') return;
+            const target = document.querySelector(href);
+            if (target) smoothScrollTo(target, 1200);
+        });
+    });
 
     // === Hamburger ===
     const hamburger = document.getElementById('hamburger');
@@ -114,58 +158,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { threshold: 0.5 });
     counters.forEach(c => counterObs.observe(c));
 
-    // === Smooth Scroll (Native CSS smooth + JS fallback) ===
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-        a.addEventListener('click', e => {
-            e.preventDefault();
-            const href = a.getAttribute('href');
-            if (href === '#') return;
-            const target = document.querySelector(href);
-            if (target) {
-                const navHeight = navbar?.offsetHeight || 80;
-                const targetPos = target.getBoundingClientRect().top + window.scrollY - navHeight;
-                window.scrollTo({ top: targetPos, behavior: 'smooth' });
-            }
-        });
-    });
-
     // === WhatsApp Form Integration ===
     const form = document.getElementById('contactForm');
     const submitBtn = document.getElementById('submitBtn');
 
     form?.addEventListener('submit', e => {
         e.preventDefault();
-
         const name = document.getElementById('cName').value.trim();
         const phone = document.getElementById('cPhone').value.trim();
         const email = document.getElementById('cEmail').value.trim();
         const service = document.getElementById('cService').value;
         const message = document.getElementById('cMessage').value.trim();
 
-        const waMessage = `🔹 *New Inquiry — ZAI Productions*
-
-👤 *Name:* ${name}
-📞 *Phone:* ${phone || 'Not provided'}
-📧 *Email:* ${email}
-💼 *Service:* ${service}
-
-📝 *Project Details:*
-${message}
-
----
-Sent from ZAI Productions Website`;
-
-        const encodedMsg = encodeURIComponent(waMessage);
-        const waURL = `https://wa.me/94750761016?text=${encodedMsg}`;
+        const waMessage = `🔹 *New Inquiry — ZAI Productions*\n\n👤 *Name:* ${name}\n📞 *Phone:* ${phone || 'Not provided'}\n📧 *Email:* ${email}\n💼 *Service:* ${service}\n\n📝 *Project Details:*\n${message}\n\n---\nSent from ZAI Productions Website`;
 
         submitBtn.innerHTML = '<span>Sending...</span>';
         submitBtn.style.background = 'linear-gradient(135deg, #25d366, #128c7e)';
 
         setTimeout(() => {
-            window.open(waURL, '_blank');
+            window.open(`https://wa.me/94750761016?text=${encodeURIComponent(waMessage)}`, '_blank');
             submitBtn.innerHTML = '<i class="fas fa-check"></i><span>Sent via WhatsApp!</span>';
             submitBtn.style.background = 'linear-gradient(135deg, #25d366, #00e5d0)';
-
             setTimeout(() => {
                 submitBtn.innerHTML = '<i class="fab fa-whatsapp"></i><span>Send via WhatsApp</span>';
                 submitBtn.style.background = '';
@@ -185,8 +198,8 @@ Sent from ZAI Productions Website`;
         btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
     });
 
-    // === Tilt on Cards ===
-    document.querySelectorAll('.svc-card, .test-card, .why-card').forEach(card => {
+    // === 3D Tilt on Cards ===
+    document.querySelectorAll('.svc-card, .test-card, .why-card, .prs-item').forEach(card => {
         card.addEventListener('mousemove', e => {
             const r = card.getBoundingClientRect();
             const x = (e.clientX - r.left - r.width / 2) / 20;
@@ -196,6 +209,22 @@ Sent from ZAI Productions Website`;
         card.addEventListener('mouseleave', () => { card.style.transform = ''; });
     });
 
+    // === Profile Card 3D Tilt ===
+    const profileCard3d = document.querySelector('.profile-card-3d');
+    if (profileCard3d) {
+        profileCard3d.addEventListener('mousemove', e => {
+            const r = profileCard3d.getBoundingClientRect();
+            const x = (e.clientX - r.left - r.width / 2) / 40;
+            const y = (e.clientY - r.top - r.height / 2) / 40;
+            const card = profileCard3d.querySelector('.profile-card');
+            if (card) card.style.transform = `rotateY(${x}deg) rotateX(${-y}deg)`;
+        });
+        profileCard3d.addEventListener('mouseleave', () => {
+            const card = profileCard3d.querySelector('.profile-card');
+            if (card) card.style.transform = '';
+        });
+    }
+
     // === Parallax Background ===
     window.addEventListener('scroll', () => {
         const y = window.scrollY;
@@ -203,7 +232,7 @@ Sent from ZAI Productions Website`;
             const speed = (i + 1) * 0.02;
             orb.style.transform = `translateY(${y * speed}px)`;
         });
-    });
+    }, { passive: true });
 
     // === Hero Particles ===
     const particlesContainer = document.getElementById('heroParticles');
@@ -217,25 +246,15 @@ Sent from ZAI Productions Website`;
             const duration = Math.random() * 3 + 3;
             const colors = ['var(--purple)', 'var(--cyan)', 'var(--pink)', 'var(--yellow)'];
             const color = colors[Math.floor(Math.random() * colors.length)];
-            p.style.cssText = `
-                position:absolute;width:${size}px;height:${size}px;
-                background:${color};border-radius:50%;
-                left:${x}%;top:${y}%;opacity:0;
-                animation:particleFade ${duration}s ease-in-out ${delay}s infinite;
-            `;
+            p.style.cssText = `position:absolute;width:${size}px;height:${size}px;background:${color};border-radius:50%;left:${x}%;top:${y}%;opacity:0;animation:particleFade ${duration}s ease-in-out ${delay}s infinite;`;
             particlesContainer.appendChild(p);
         }
         const style = document.createElement('style');
-        style.textContent = `
-            @keyframes particleFade {
-                0%, 100% { opacity: 0; transform: translateY(0) scale(1); }
-                50% { opacity: .6; transform: translateY(-20px) scale(1.5); }
-            }
-        `;
+        style.textContent = `@keyframes particleFade{0%,100%{opacity:0;transform:translateY(0) scale(1)}50%{opacity:.6;transform:translateY(-20px) scale(1.5)}}`;
         document.head.appendChild(style);
     }
 
-    // === Floating Service Card Hover ===
+    // === Float Service Hover ===
     document.querySelectorAll('.float-service').forEach(card => {
         card.addEventListener('mousemove', e => {
             const r = card.getBoundingClientRect();
@@ -243,8 +262,6 @@ Sent from ZAI Productions Website`;
             const y = (e.clientY - r.top - r.height / 2) / 10;
             card.style.transform = `perspective(600px) rotateY(${x}deg) rotateX(${-y}deg) scale(1.08)`;
         });
-        card.addEventListener('mouseleave', () => {
-            card.style.transform = 'scale(1)';
-        });
+        card.addEventListener('mouseleave', () => { card.style.transform = 'scale(1)'; });
     });
 });
