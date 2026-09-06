@@ -1,5 +1,5 @@
 // ============================================
-// ZAI Productions — Ultra Premium JavaScript
+// ZAI Productions — Premium JavaScript
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -9,10 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const trail = document.getElementById('cursorTrail');
     let cx = 0, cy = 0, tx = 0, ty = 0;
 
-    document.addEventListener('mousemove', e => {
-        tx = e.clientX;
-        ty = e.clientY;
-    });
+    document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
 
     function animateCursor() {
         cx += (tx - cx) * 0.15;
@@ -23,8 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     animateCursor();
 
-    // Cursor hover effects
-    document.querySelectorAll('a, button, .svc-card, .why-card, .test-card, .cm-card, .pill, .af-item').forEach(el => {
+    document.querySelectorAll('a, button, .svc-card, .why-card, .test-card, .cm-card, .pill, .af-item, .float-service').forEach(el => {
         el.addEventListener('mouseenter', () => cursor?.classList.add('active'));
         el.addEventListener('mouseleave', () => cursor?.classList.remove('active'));
     });
@@ -32,6 +28,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // === Loader ===
     const loader = document.getElementById('loader');
     setTimeout(() => loader?.classList.add('hidden'), 2500);
+
+    // === Hero Animations ===
+    setTimeout(() => {
+        document.querySelectorAll('.hmt-word').forEach((w, i) => {
+            setTimeout(() => w.classList.add('visible'), i * 120);
+        });
+    }, 800);
+
+    setTimeout(() => {
+        document.querySelectorAll('.float-service').forEach((c, i) => {
+            setTimeout(() => c.classList.add('visible'), i * 150 + 1200);
+        });
+    }, 100);
 
     // === Navbar Scroll ===
     const navbar = document.getElementById('navbar');
@@ -83,27 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
     revealEls.forEach(el => revealObs.observe(el));
 
-    // === Hero Word Reveal ===
-    const lineWords = document.querySelectorAll('.line-word');
-    setTimeout(() => {
-        lineWords.forEach((w, i) => setTimeout(() => w.classList.add('visible'), i * 120 + 600));
-    }, 100);
-
-    // Hero elements reveal
-    setTimeout(() => {
-        document.querySelector('.hero-badge')?.classList.add('visible');
-        document.querySelector('.hero-desc')?.classList.add('visible');
-        document.querySelector('.hero-actions')?.classList.add('visible');
-        document.querySelector('.hero-metrics')?.classList.add('visible');
-    }, 500);
-
-    // Orbit cards reveal
-    setTimeout(() => {
-        document.querySelectorAll('.orbit-card').forEach((c, i) => {
-            setTimeout(() => c.classList.add('visible'), i * 200 + 1000);
-        });
-    }, 100);
-
     // === Counter Animation ===
     const counters = document.querySelectorAll('[data-count]');
     const counterObs = new IntersectionObserver(entries => {
@@ -125,26 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, { threshold: 0.5 });
     counters.forEach(c => counterObs.observe(c));
-
-    // === Ring Progress ===
-    document.querySelectorAll('.ring-fill').forEach(ring => {
-        const progress = parseInt(ring.getAttribute('data-progress'));
-        const circumference = 2 * Math.PI * 45;
-        const offset = circumference - (progress / 100) * circumference;
-        ring.style.strokeDasharray = circumference;
-        ring.style.strokeDashoffset = circumference;
-
-        const ringObs = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    ring.style.transition = 'stroke-dashoffset 2s cubic-bezier(.22,1,.36,1)';
-                    ring.style.strokeDashoffset = offset;
-                    ringObs.unobserve(ring);
-                }
-            });
-        }, { threshold: 0.5 });
-        ringObs.observe(ring);
-    });
 
     // === Smooth Scroll ===
     document.querySelectorAll('a[href^="#"]').forEach(a => {
@@ -168,7 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const service = document.getElementById('cService').value;
         const message = document.getElementById('cMessage').value.trim();
 
-        // Build WhatsApp message with all form data
         const waMessage = `🔹 *New Inquiry — ZAI Productions*
 
 👤 *Name:* ${name}
@@ -185,23 +152,11 @@ Sent from ZAI Productions Website`;
         const encodedMsg = encodeURIComponent(waMessage);
         const waURL = `https://wa.me/94750761016?text=${encodedMsg}`;
 
-        // Animate button
         submitBtn.innerHTML = '<span>Sending...</span>';
         submitBtn.style.background = 'linear-gradient(135deg, #25d366, #128c7e)';
 
         setTimeout(() => {
-            // Open WhatsApp
             window.open(waURL, '_blank');
-
-            // Also open email as backup
-            const emailSubject = encodeURIComponent(`New Inquiry — ${service} — ${name}`);
-            const emailBody = encodeURIComponent(
-                `Name: ${name}\nPhone: ${phone}\nEmail: ${email}\nService: ${service}\n\nDetails:\n${message}`
-            );
-            // Uncomment below to also send email:
-            // window.open(`mailto:zai2007.official@icloud.com?subject=${emailSubject}&body=${emailBody}`, '_blank');
-
-            // Show success
             submitBtn.innerHTML = '<i class="fas fa-check"></i><span>Sent via WhatsApp!</span>';
             submitBtn.style.background = 'linear-gradient(135deg, #25d366, #00e5d0)';
 
@@ -244,70 +199,46 @@ Sent from ZAI Productions Website`;
         });
     });
 
-    // === Smooth Reveal for Badge ===
-    const heroBadge = document.querySelector('.hero-badge');
-    if (heroBadge) {
-        heroBadge.style.opacity = '0';
-        heroBadge.style.transform = 'translateY(20px)';
-        setTimeout(() => {
-            heroBadge.style.transition = 'all 1s cubic-bezier(.22,1,.36,1)';
-            heroBadge.style.opacity = '1';
-            heroBadge.style.transform = 'translateY(0)';
-        }, 2500);
+    // === Hero Particles ===
+    const particlesContainer = document.getElementById('heroParticles');
+    if (particlesContainer) {
+        for (let i = 0; i < 30; i++) {
+            const p = document.createElement('div');
+            const size = Math.random() * 4 + 1;
+            const x = Math.random() * 100;
+            const y = Math.random() * 100;
+            const delay = Math.random() * 5;
+            const duration = Math.random() * 3 + 3;
+            const colors = ['var(--purple)', 'var(--cyan)', 'var(--pink)', 'var(--yellow)'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            p.style.cssText = `
+                position:absolute;width:${size}px;height:${size}px;
+                background:${color};border-radius:50%;
+                left:${x}%;top:${y}%;opacity:0;
+                animation:particleFade ${duration}s ease-in-out ${delay}s infinite;
+            `;
+            particlesContainer.appendChild(p);
+        }
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes particleFade {
+                0%, 100% { opacity: 0; transform: translateY(0) scale(1); }
+                50% { opacity: .6; transform: translateY(-20px) scale(1.5); }
+            }
+        `;
+        document.head.appendChild(style);
     }
 
-    // === Number Counter Glow Effect ===
-    document.querySelectorAll('.metric-value span[data-count]').forEach(el => {
-        const target = parseInt(el.getAttribute('data-count'));
-        const numObs = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    let cur = 0;
-                    const step = target / 60;
-                    const anim = () => {
-                        cur += step;
-                        if (cur < target) { el.textContent = Math.floor(cur); requestAnimationFrame(anim); }
-                        else { el.textContent = target; }
-                    };
-                    anim();
-                    numObs.unobserve(el);
-                }
-            });
-        }, { threshold: 0.5 });
-        numObs.observe(el);
-    });
-
-    // === Ripple Effect on Service WhatsApp Buttons ===
-    document.querySelectorAll('.svc-btn').forEach(btn => {
-        btn.addEventListener('click', e => {
-            const ripple = document.createElement('span');
-            ripple.style.cssText = `
-                position:absolute;width:100%;height:100%;border-radius:50%;
-                background:rgba(255,255,255,.3);transform:scale(0);
-                animation:ripple .6s ease-out;pointer-events:none;
-            `;
-            btn.style.position = 'relative';
-            btn.style.overflow = 'hidden';
-            btn.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 600);
+    // === Floating Service Card Hover ===
+    document.querySelectorAll('.float-service').forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const r = card.getBoundingClientRect();
+            const x = (e.clientX - r.left - r.width / 2) / 10;
+            const y = (e.clientY - r.top - r.height / 2) / 10;
+            card.style.transform = `perspective(600px) rotateY(${x}deg) rotateX(${-y}deg) scale(1.08)`;
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'scale(1)';
         });
     });
-
-    // Add ripple keyframes
-    const style = document.createElement('style');
-    style.textContent = `@keyframes ripple{to{transform:scale(4);opacity:0}}`;
-    document.head.appendChild(style);
-
-    // === Typing Effect on Hero Description (Optional) ===
-    const heroDesc = document.querySelector('.hero-desc');
-    if (heroDesc) {
-        const text = heroDesc.innerHTML;
-        heroDesc.innerHTML = '';
-        heroDesc.style.opacity = '1';
-        heroDesc.style.transform = 'none';
-        setTimeout(() => {
-            heroDesc.innerHTML = text;
-            heroDesc.classList.add('visible');
-        }, 1500);
-    }
 });
