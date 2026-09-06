@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         // Open email client
-        window.location.href = `mailto:zaieduhub@gmail.com?subject=${subject}&body=${body}`;
+        window.location.href = `mailto:zai2007.official@icloud.com?subject=${subject}&body=${body}`;
 
         // Show success feedback
         const btn = contactForm.querySelector('button[type="submit"]');
