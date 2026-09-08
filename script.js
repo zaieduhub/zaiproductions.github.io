@@ -27,21 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateActiveNav();
     }, { passive: true });
 
-    // Wheel event for float
-    window.addEventListener('wheel', e => {
-        e.preventDefault();
-        scrollVelocity += e.deltaY * 0.5;
-    }, { passive: false });
-
-    // Touch for mobile
-    let lastTouch = 0;
-    window.addEventListener('touchstart', e => { lastTouch = e.touches[0].clientY; }, { passive: true });
-    window.addEventListener('touchmove', e => {
-        const delta = lastTouch - e.touches[0].clientY;
-        scrollVelocity += delta * 0.8;
-        lastTouch = e.touches[0].clientY;
-    }, { passive: true });
-
     function updateActiveNav() {
         const sections = document.querySelectorAll('section[id]');
         const links = document.querySelectorAll('.nav-link');
@@ -67,24 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-
-    // === Subtle Float Scroll ===
-    let scrollTarget = window.scrollY;
-    let scrollCurrent = window.scrollY;
-    let scrollVelocity = 0;
-    const scrollEase = 0.10;
-    const scrollFriction = 0.94;
-    let isScrolling = false;
-
-    function smoothScroll() {
-        scrollTarget += scrollVelocity;
-        scrollVelocity *= scrollFriction;
-        scrollTarget = Math.max(0, scrollTarget);
-        scrollCurrent += (scrollTarget - scrollCurrent) * scrollEase;
-        window.scrollTo(0, Math.round(scrollCurrent));
-        requestAnimationFrame(smoothScroll);
-    }
-    smoothScroll();
 
     // === Hamburger ===
     const hamburger = document.getElementById('hamburger');
@@ -148,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const service = document.getElementById('cService').value;
         const message = document.getElementById('cMessage').value.trim();
 
-        const waMessage = `🔹 *New Inquiry — ZAI Productions*\n\n👤 *Name:* ${name}\n📞 *Phone:* ${phone || 'Not provided'}\n📧 *Email:* ${email}\n💼 *Service:* ${service}\n\n📝 *Project Details:*\n${message}\n\n---\nSent from ZAI Productions Website`;
+        const waMessage = `🔹 *New Inquiry — ZAI Productions*\n\n👤 *Name:* ${name}\n📞 *Phone:* ${phone || 'Not provided'}\n📧 *Email:* ${email}\n💼 *Service:* ${service}\n\n📝 *Pr[...]`
 
         submitBtn.innerHTML = '<span>Sending...</span>';
         submitBtn.style.background = 'linear-gradient(135deg, #25d366, #128c7e)';
@@ -177,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const duration = Math.random() * 3 + 3;
             const colors = ['var(--purple)', 'var(--cyan)', 'var(--pink)', 'var(--yellow)'];
             const color = colors[Math.floor(Math.random() * colors.length)];
-            p.style.cssText = `position:absolute;width:${size}px;height:${size}px;background:${color};border-radius:50%;left:${x}%;top:${y}%;opacity:0;animation:particleFade ${duration}s ease-in-out ${delay}s infinite;`;
+            p.style.cssText = `position:absolute;width:${size}px;height:${size}px;background:${color};border-radius:50%;left:${x}%;top:${y}%;opacity:0;animation:particleFade ${duration}s ease-in-[...]`;
             particlesContainer.appendChild(p);
         }
         const style = document.createElement('style');
